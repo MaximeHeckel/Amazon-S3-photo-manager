@@ -15,12 +15,12 @@ import (
 var (
 	bucketName string
 	fileName   string
-	imageFile  string
+	folder     string
 )
 
 func init() {
 	flag.StringVar(&bucketName, "b", "", "Bucket Name")
-	//flag.StringVar(&imageFile, "i", "", "Image File")
+	flag.StringVar(&folder, "f", "", "Folder")
 }
 
 func readFile(file string) ([]byte, string) {
@@ -57,7 +57,7 @@ func main() {
 	//Set connection to bucket
 	bucket := s.Bucket(bucketName)
 
-	files, _ := ioutil.ReadDir(".")
+	files, _ := ioutil.ReadDir(folder)
 	for _, f := range files {
 		bytes, filename := readFile(f.Name())
 		//File Info
@@ -66,5 +66,6 @@ func main() {
 		if err != nil {
 			os.Exit(1)
 		}
+		fmt.Printf("Uploaded %s to %s on S3\n", fileName, bucketName)
 	}
 }
