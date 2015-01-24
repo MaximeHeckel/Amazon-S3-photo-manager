@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 
@@ -19,7 +20,7 @@ var (
 
 func init() {
 	flag.StringVar(&bucketName, "b", "", "Bucket Name")
-	flag.StringVar(&imageFile, "i", "", "Image File")
+	//flag.StringVar(&imageFile, "i", "", "Image File")
 }
 
 func readFile(file string) ([]byte, string) {
@@ -50,17 +51,20 @@ func main() {
 		panic(err.Error())
 	}
 
-	bytes, filename := readFile(imageFile)
 	//Set new S3 connection
 	s := s3.New(auth, aws.USEast)
 
 	//Set connection to bucket
 	bucket := s.Bucket(bucketName)
 
-	//File Info
-	filetype := http.DetectContentType(bytes)
-	err = bucket.Put(filename, bytes, filetype, s3.BucketOwnerFull)
-	if err != nil {
-		panic(err.Error())
+	files, _ := ioutil.ReadDir(".")
+	for _, f := range files {
+		bytes, filename := readFile(f.Name())
+		//File Info
+		filetype := http.DetectContentType(bytes)
+		err = bucket.Put(filename, bytes, filetype, s3.BucketOwnerFull)
+		if err != nil {
+			os.Exit(1)
+		}
 	}
 }
